@@ -1,5 +1,6 @@
 from PyQt5 import QtCore
 from PyQt5.QtWidgets import QWidget, QHBoxLayout, QFrame, QLineEdit, QVBoxLayout, QListWidget, QCompleter, QPushButton
+from .elements.list_item import ListItem
 
 
 class TrainingListWidget(QWidget):
@@ -7,14 +8,20 @@ class TrainingListWidget(QWidget):
         super(TrainingListWidget, self).__init__(*args, **kwargs)
         layout = QVBoxLayout()
         self.setLayout(layout)
-
-        names = ["Hallo", "Tschau", "Ich liebe dich", "Hi"]
-        completer = QCompleter(names)
+        self.setStyleSheet("background-color: rgb(54,197,254)")
         searchBar = QLineEdit()
-        searchBar.setCompleter(completer)
-        resultList = QListWidget()
-        addButton = QPushButton("+", self)
-        addButton.setToolTip('Add a new training entry')
+        searchBar.setPlaceholderText("Filter...")
+        self.resultList = QListWidget() # write own class with entries
+        self.addButton = QPushButton("+", self)
+        self.addButton.setToolTip('Add a new training entry')
+        self.addButton.setStyleSheet("background-color: rgb(54,197,254); color: rgb(2,4,40)")
         layout.addWidget(searchBar)
-        layout.addWidget(resultList)
-        layout.addWidget(addButton)
+        layout.addWidget(self.resultList)
+        layout.addWidget(self.addButton)
+
+    def display(self, entries, currentEntry, clickListener):
+        self.resultList.clear()
+        for entry in entries:
+            self.resultList.addItem(ListItem(entry.name))
+            self.resultList.itemClicked.connect(clickListener)
+        self.resultList.setCurrentRow(0)
