@@ -32,7 +32,11 @@ class MainWindow(QMainWindow, Observer, metaclass=MetaMainWindow):
         self.show()
 
     def displayEntries(self, entries, current):
-        self.listWidget.display(entries, current, self.editEntry)
+        self.listWidget.display(entries, current)
+
+    def selectEntry(self, entry):
+        # self.listWidget.selectEntry(entry)
+        self.editEntry(entry)
 
     def editEntry(self, entry):
         self.editWidget.show(entry)
@@ -40,6 +44,8 @@ class MainWindow(QMainWindow, Observer, metaclass=MetaMainWindow):
     def update(self, type):
         if(type == Entries.UPDATE.ALL):
             self.displayEntries(Entries.entries, Entries.currentEntry)
+            self.editEntry(Entries.currentEntry)
+            self.editWidget.setStatusSaved(Entries.currentEntry.isSaved)
         elif(type == Entries.UPDATE.CURRENT):
             self.editEntry(Entries.currentEntry)
         elif(type == Entries.UPDATE.SAVED):

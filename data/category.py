@@ -13,8 +13,11 @@ class Category():
 
     def __load__data__(self, data):
         if(isinstance(data, Category)):
+            if hasattr(data, "_id"):
+                self._id = data._id
             self.name = data.name
         else:
+            self._id = data["_id"]
             self.name = data["name"]
              
 
@@ -37,11 +40,23 @@ class Category():
 
     def save(self):
         if(self.name is not None):
-            Database.insert(Database.COLLECTIONS.CATEGORY, self)
+            if hasattr(self, "_id"):
+                Database.replace(Database.COLLECTIONS.CATEGORY, self.toDict())
+            else:
+                self._id = Database.insert(Database.COLLECTIONS.CATEGORY, self.toDict())
             self.isSaved = True
+            self.data = self.toDict()
         else:
             raise Exception("Category can't be saved without name.")
 
     def revert(self):
         self.isSaved = True
-        __load__data__(self.data)
+        self.__load__data__(self.data)
+
+    def toDict(self):
+        dict = {
+            "name": self.name
+        }
+        if hasattr(self, "_id"):
+            dict["_id"] = self._id
+        return dict

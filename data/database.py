@@ -19,7 +19,11 @@ class Database(object):
 
     @staticmethod
     def insert(collection, data):
-        Database.DATABASE[collection].insert(data.__dict__)
+        return Database.DATABASE[collection].insert_one(data)
+
+    @staticmethod
+    def replace(collection, data):
+        return Database.DATABASE[collection].replace_one({"_id": data["_id"]}, data)
 
     @staticmethod
     def find(collection, query):
@@ -28,3 +32,7 @@ class Database(object):
     @staticmethod
     def find_one(collection, query):
         return Database.DATABASE[collection].find_one(query)
+
+    @staticmethod
+    def delete_one(collection, query):
+        return Database.DATABASE[collection].delete_one(query)

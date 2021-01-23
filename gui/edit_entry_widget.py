@@ -22,13 +22,24 @@ class EditEntryWidget(QWidget):
         # Keyword list
         keywordWidget = QWidget()
         keywordLayout = QVBoxLayout()
+        keywordHeaderWidget = QWidget()
+        keywordHeaderLayout = QHBoxLayout()
+
         keywordLabel = QLabel("Keywords")
         keywordList = QListWidget()
         keywordList.setStyleSheet("background-color: rgb(54,197,254); color: rgb(2,4,40)")
         #testButton = QListWidgetItem("Test")
         #keywordList.addItem(testButton)
+        self.addKeywordButton = QPushButton("+")
+        self.removeKeywordButton = QPushButton("-")
 
-        keywordLayout.addWidget(keywordLabel)
+        keywordHeaderLayout.addWidget(keywordLabel)
+        keywordHeaderLayout.addStretch(1)
+        keywordHeaderLayout.addWidget(self.addKeywordButton)
+        keywordHeaderLayout.addWidget(self.removeKeywordButton)
+
+        keywordHeaderWidget.setLayout(keywordHeaderLayout)
+        keywordLayout.addWidget(keywordHeaderWidget)
         keywordLayout.addWidget(keywordList)
         keywordWidget.setLayout(keywordLayout)
 
@@ -40,7 +51,20 @@ class EditEntryWidget(QWidget):
         answerLabel = QLabel("Answers")
         answerList = QListWidget()
 
-        answerLayout.addWidget(answerLabel)
+        answerHeaderWidget = QWidget()
+        answerHeaderLayout = QHBoxLayout()
+        answerHeaderLayout.addWidget(answerLabel)
+        answerHeaderLayout.addStretch(1)
+
+        self.addKeywordButton = QPushButton("+")
+        self.removeKeywordButton = QPushButton("-")
+
+        answerHeaderLayout.addWidget(self.addKeywordButton)
+        answerHeaderLayout.addWidget(self.removeKeywordButton)
+
+        answerHeaderWidget.setLayout(answerHeaderLayout)
+
+        answerLayout.addWidget(answerHeaderWidget)
         answerLayout.addWidget(answerList)
         answerWidget.setLayout(answerLayout)
         answerList.setStyleSheet("background-color: rgb(54,197,254)")
@@ -51,7 +75,7 @@ class EditEntryWidget(QWidget):
         buttonBar = QWidget()
         buttonLayout = QHBoxLayout()
         self.saveButton = QPushButton("save")
-        self.saveButton.setStyleSheet("color: rgb(150,254,150)")
+        self.saveButton.setStyleSheet("color: rgb(54,197,254)")
         self.cancelButton = QPushButton("cancel")
 
         buttonLayout.addWidget(self.saveButton)
@@ -63,14 +87,13 @@ class EditEntryWidget(QWidget):
     
     def show(self, entry):
         self.item = entry
+        self.nameTextEdit.setText(entry.name)
 
     def setStatusSaved(self, status):
         if(status == True):
-            self.saveButton.setStyleSheet("color: rgb(150,254,150)")
-            self.cancelButton.setEnabled(False)
-        else:
             self.saveButton.setStyleSheet("color: rgb(54,197,254)")
-            self.cancelButton.setEnabled(True)
+        else:
+            self.saveButton.setStyleSheet("color: rgb(150,254,150)")
 
     def getName(self):
         return self.nameTextEdit.text()
