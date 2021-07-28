@@ -1,11 +1,15 @@
 import abc
 from PyQt5 import QtCore
-from PyQt5.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QFrame, QLineEdit, QVBoxLayout, QPushButton, QLabel, QListWidget, QListWidgetItem
+from PyQt5.QtWidgets import QWidget, QLineEdit,QSpacerItem, QListWidgetItem, QHBoxLayout, QVBoxLayout, QFrame, QLineEdit, QComboBox, QVBoxLayout, QPushButton, QLabel, QListWidget, QListWidgetItem, QTreeWidget
+from data import Domains
+from gui import DomainEditor, SentenceWidget
+from data import Entries
 
 class EditEntryWidget(QWidget):
     def __init__(self, *args, **kwargs):
         __metaclass__ = abc.ABCMeta
         super(EditEntryWidget, self).__init__(*args, **kwargs)
+        self.currentPattern = None
         layout = QVBoxLayout()
         self.setStyleSheet("color: rgb(54,197,254)")
         nameWidget = QWidget()
@@ -13,8 +17,22 @@ class EditEntryWidget(QWidget):
         nameLabel = QLabel("Entry Name")
         self.nameTextEdit = QLineEdit()
         self.nameTextEdit.setStyleSheet("background-color: rgb(54,197,254); color: rgb(2,4,40)")
+        self.domainDialog = DomainEditor()
+        domainW = QWidget()
+        domainLayout = QHBoxLayout()
+    
+        self.domainSelector = QComboBox(self)
+        self.domainSelector.addItem('none')
+        self.domains = QPushButton("Edit Domains")
+
+        domainLayout.addWidget(self.domainSelector)
+        domainLayout.addWidget(self.domains)
+        domainW.setLayout(domainLayout)
+
         nameLayout.addWidget(nameLabel)
         nameLayout.addWidget(self.nameTextEdit)
+        nameLayout.addWidget(QLabel("Domain"))
+        nameLayout.addWidget(domainW)
         nameWidget.setLayout(nameLayout)
 
         layout.addWidget(nameWidget)
@@ -26,12 +44,15 @@ class EditEntryWidget(QWidget):
         keywordHeaderLayout = QHBoxLayout()
 
         keywordLabel = QLabel("Keywords")
-        keywordList = QListWidget()
-        keywordList.setStyleSheet("background-color: rgb(54,197,254); color: rgb(2,4,40)")
+        self.keywordList = QListWidget()
+        self.keywordList.setStyleSheet("background-color: rgb(54,197,254); color: rgb(2,4,40)")
         #testButton = QListWidgetItem("Test")
         #keywordList.addItem(testButton)
         self.addKeywordButton = QPushButton("+")
         self.removeKeywordButton = QPushButton("-")
+        self.keywordList.itemClicked.connect(self.pattern_selected)
+        self.addKeywordButton.clicked.connect(self.addPatternEvent)
+        self.removeKeywordButton.clicked.connect(self.removePattern)
 
         keywordHeaderLayout.addWidget(keywordLabel)
         keywordHeaderLayout.addStretch(1)
@@ -40,7 +61,7 @@ class EditEntryWidget(QWidget):
 
         keywordHeaderWidget.setLayout(keywordHeaderLayout)
         keywordLayout.addWidget(keywordHeaderWidget)
-        keywordLayout.addWidget(keywordList)
+        keywordLayout.addWidget(self.keywordList)
         keywordWidget.setLayout(keywordLayout)
 
         layout.addWidget(keywordWidget)
@@ -49,7 +70,8 @@ class EditEntryWidget(QWidget):
         answerWidget = QWidget()
         answerLayout = QVBoxLayout()
         answerLabel = QLabel("Answers")
-        answerList = QListWidget()
+        self.answerList = QTreeWidget()
+        self.answerList.setHeaderLabels(['Answer', "Neutral", "Happy", "Sad", "Angry"])
 
         answerHeaderWidget = QWidget()
         answerHeaderLayout = QHBoxLayout()
@@ -65,9 +87,10 @@ class EditEntryWidget(QWidget):
         answerHeaderWidget.setLayout(answerHeaderLayout)
 
         answerLayout.addWidget(answerHeaderWidget)
-        answerLayout.addWidget(answerList)
+        answerLayout.addWidget(self.answerList)
         answerWidget.setLayout(answerLayout)
-        answerList.setStyleSheet("background-color: rgb(54,197,254)")
+        self.answerList.setStyleSheet("background-color: rgb(54,197,254)")
+        self.answerList.header().setStyleSheet("color:rgb(2,4,40)")
 
         layout.addWidget(answerWidget)
 
@@ -88,6 +111,14 @@ class EditEntryWidget(QWidget):
     def show(self, entry):
         self.item = entry
         self.nameTextEdit.setText(entry.name)
+        idx = self.domainSelector.findText(entry.domain)
+        if idx < 0: idx = 0
+        self.domainSelector.setCurrentIndex(idx)
+
+        self.keywordList.clear()
+        for pattern in entry.patterns:
+            self.addPattern(pattern)
+
 
     def setStatusSaved(self, status):
         if(status == True):
@@ -97,3 +128,44 @@ class EditEntryWidget(QWidget):
 
     def getName(self):
         return self.nameTextEdit.text()
+
+    def getDomain(self):
+        return self.domainSelector.currentText()
+
+    def openDomainEdit(self):
+        self.domainDialog.show()
+
+    def updateDomainSelection(self):
+        self.domainSelector.clear()
+        self.domainSelector.addItem('none')
+        domains = Domains.getDomains()
+        for domain in domains:
+            self.domainSelector.addItem(domain)
+
+    def addPattern(self, str=""):
+        w = QWidget()
+        l = QHBoxLayout()
+        l.addWidget(QLabel("▹"))
+        edit = QLineEdit(str)
+        edit.textEdited.connect(lambda : Entries.setCurrentUnsaved())
+        l.addWidget(edit)
+        l.addStretch()
+        w.setLayout(l)
+        item = QListWidgetItem()
+        item.setSizeHint(l.sizeHint())
+        self.keywordList.addItem(item)
+        self.keywordList.setItemWidget(item, w)
+
+    def addPatternEvent(self):
+        self.addPattern()
+
+    def removePattern(self):
+        if self.currentPattern != None:
+            self.keywordList.takeItem(self.keywordList.currentRow())
+
+    def pattern_selected(self, item):
+        self.currentPattern = item
+
+    def addAnswer(self):
+        a = SentenceWidget()
+        a.addTo(self.answerList)

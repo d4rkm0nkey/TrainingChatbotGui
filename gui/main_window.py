@@ -4,7 +4,7 @@ from PyQt5.QtGui import QPalette, QColor
 
 from util import Observer
 from gui import TrainingListWidget, EditEntryWidget
-from data import Entries, Category
+from data import Entries, Category, Bots
 
 class MetaMainWindow(type(QMainWindow), type(Observer)):
     pass
@@ -23,7 +23,7 @@ class MainWindow(QMainWindow, Observer, metaclass=MetaMainWindow):
         splitter.addWidget(self.editWidget)
         splitter.setStretchFactor(1, 1)
         layout.addWidget(splitter)
-        self.setStyleSheet("background-color: rgb(2,4,40)")
+        self.setStyleSheet("background-color: rgb(2,4,40); color:rgb(54,197,254)")
         widget = QWidget()
         widget.setLayout(layout)
 
@@ -51,6 +51,8 @@ class MainWindow(QMainWindow, Observer, metaclass=MetaMainWindow):
         elif(type == Entries.UPDATE.SAVED):
             self.editWidget.setStatusSaved(Entries.currentEntry.isSaved)
             self.displayEntries(Entries.entries, Entries.currentEntry)
+        elif(type == Bots.BOT_UPDATE):
+            self.listWidget.updateBots(Bots.__bots__)
         else:
             print("Unknown update type")
 
@@ -61,6 +63,16 @@ class MainWindow(QMainWindow, Observer, metaclass=MetaMainWindow):
             self.editWidget.setStatusSaved(attribute_value)
 
     def getEntryData(self):
-        data = Category()
+        data = Category(None)
         data.name = self.editWidget.getName()
+        data.domain = self.editWidget.getDomain()
+        data.patterns = []
+        for i in range(self.editWidget.keywordList.count()):
+            item = self.editWidget.keywordList.item(i)
+            w = self.editWidget.keywordList.itemWidget(item)
+            data.patterns.append(w.layout().itemAt(1).widget().text())
         return data
+
+    def updateDomains(self):
+        self.editWidget.domainDialog.showDomains()
+        self.editWidget.updateDomainSelection()

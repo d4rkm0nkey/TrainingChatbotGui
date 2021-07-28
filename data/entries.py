@@ -38,24 +38,28 @@ class Entries():
             observer.update(type)
     
     @staticmethod
-    def loadEntries():
-        categories = Database.find(Database.COLLECTIONS.CATEGORY, None)
-        for data in categories:
-            c = Category(data)
-            Entries.entries.append(c)
+    def loadEntries(bot):
+        Entries.entries = []
+        if hasattr(bot, "_id"):
+            categories = Database.find(Database.COLLECTIONS.CATEGORY, {"bot": bot._id})
+            for data in categories:
+                c = Category(bot, data)
+                Entries.entries.append(c)
+        
         if(len(Entries.entries) > 0):
             Entries.currentEntry = Entries.entries[0]
         else:
-            Entries.newEntry()
+            Entries.currentEntry = Entries.newEntry(bot)
         Entries._notify(Entries.UPDATE.ALL)
         
     @staticmethod
-    def newEntry():
-        entry = Category()
+    def newEntry(bot):
+        entry = Category(bot)
         Entries.entries.append(entry)
         Entries.unsaved_entries.append(entry)
         Entries.currentEntry = entry
         Entries._notify(Entries.UPDATE.ALL)
+        return entry
 
     # @staticmethod
     # def addEntry(entry):
@@ -117,3 +121,13 @@ class Entries():
         Entries.currentEntry.setName(title)
         Entries.unsaved_entries.append(Entries.currentEntry)
         Entries._notify(Entries.UPDATE.ALL)
+
+    @staticmethod
+    def deleteEntries(bot):
+        Database.delete_many(Database.COLLECTIONS.CATEGORY, {"bot": bot._id})
+
+    @staticmethod
+    def setCurrentUnsaved():
+        Entries.currentEntry.isSaved = False
+        Entries.unsaved_entries.append(Entries.currentEntry)
+        Entries._notify(Entries.UPDATE.SAVED)

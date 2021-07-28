@@ -8,16 +8,24 @@ from data import Database
 from gui import MainWindow
 from logic import MainController, Adapter
 
-Database.initialize()
+def main():
+    try:
+        Database.initialize()
+    except Exception as e:
+        print(e)
+        return
 
-app = QApplication(sys.argv)
-app.setWindowIcon(QtGui.QIcon('logo.png'))
+    app = QApplication(sys.argv)
+    app.setWindowIcon(QtGui.QIcon('logo.png'))
 
-w = MainWindow()
-c = MainController()
-adapter = Adapter(c, w)
+    c = MainController()
+    w = MainWindow()
+    adapter = Adapter(c, w)
 
 
-w.show()
+    w.show()
 
-sys.exit(app.exec_())
+    sys.exit(app.exec_())
+
+if __name__ == '__main__':
+    main()

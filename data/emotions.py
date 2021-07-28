@@ -10,8 +10,6 @@ class Emotions():
         for document in emotions:
           __emotions__.append(document["name"])
 
-        print(__emotions__)
-
     @staticmethod
     def getLength():
         return len(__emotions__)

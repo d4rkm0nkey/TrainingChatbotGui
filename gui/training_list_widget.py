@@ -1,5 +1,5 @@
 from PyQt5 import QtCore
-from PyQt5.QtWidgets import QWidget, QHBoxLayout, QFrame, QLineEdit, QVBoxLayout, QListWidget, QCompleter, QPushButton, QLabel
+from PyQt5.QtWidgets import QWidget, QHBoxLayout, QFrame, QComboBox, QVBoxLayout, QListWidget, QCompleter, QPushButton, QLabel
 from PyQt5.QtGui import QBrush, QColor
 from .elements.list_item import ListItem
 
@@ -10,10 +10,32 @@ class TrainingListWidget(QWidget):
         self.entries = []
         layout = QVBoxLayout()
         self.setLayout(layout)
-        self.setStyleSheet("background-color: rgb(54,197,254)")
-        searchBar = QLineEdit()
-        searchBar.setPlaceholderText("Filter...")
+        self.setStyleSheet("background-color: rgb(54,197,254); color: rgb(2,4,40)")
+
+        # Select Bot
+        selectBot = QWidget()
+        selectBotLayout = QHBoxLayout()
+        selectBot.setLayout(selectBotLayout)
+
+        self.selectBotBar = QComboBox()
+        self.selectBotBar.addItem("General")
+        self.selectBotBar.addItem("Gustav")
+        self.addBotButton = QPushButton('+')
+        self.addBotButton.setFixedWidth(30)
+        self.deleteBotButton = QPushButton('x')
+        self.deleteBotButton.setFixedWidth(30)
+
+        self.selectBotBar.currentIndexChanged.connect(self.dropDownListener)
+
+
+        selectBotLayout.addWidget(self.selectBotBar)
+        selectBotLayout.addWidget(self.addBotButton)
+        selectBotLayout.addWidget(self.deleteBotButton)
+
+        # Category List
         self.resultList = QListWidget() # write own class with entries
+
+        # Add remove Categories
         self.addButton = QPushButton("+", self)
         self.addButton.setToolTip('Add a new training entry')
         self.addButton.setStyleSheet("background-color: rgb(54,197,254); color: rgb(2,4,40)")
@@ -29,7 +51,7 @@ class TrainingListWidget(QWidget):
         buttonWidget.setLayout(buttonLayout)
         buttonWidget.setStyleSheet("background-color: rgb(2,4,40)")
 
-        layout.addWidget(searchBar)
+        layout.addWidget(selectBot)
         layout.addWidget(self.resultList)
         layout.addWidget(buttonWidget)
 
@@ -61,3 +83,14 @@ class TrainingListWidget(QWidget):
             if(item is listItem):
                 return self.entries[i]
             i += 1
+
+    def dropDownListener(self, index):
+        if index == 0:
+            self.deleteBotButton.setEnabled(False)
+        else:
+            self.deleteBotButton.setEnabled(True)
+
+    def updateBots(self, bots):
+        self.selectBotBar.clear()
+        for bot in bots:
+            self.selectBotBar.addItem(bot.name)
