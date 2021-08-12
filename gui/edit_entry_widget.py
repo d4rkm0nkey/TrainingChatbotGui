@@ -1,4 +1,5 @@
 import abc
+from data import AnswerTypes
 from PyQt5 import QtCore
 from PyQt5.QtWidgets import QWidget, QLineEdit,QSpacerItem, QListWidgetItem, QHBoxLayout, QVBoxLayout, QFrame, QLineEdit, QComboBox, QVBoxLayout, QPushButton, QLabel, QListWidget, QListWidgetItem, QTreeWidget
 from data import Domains
@@ -71,19 +72,21 @@ class EditEntryWidget(QWidget):
         answerLayout = QVBoxLayout()
         answerLabel = QLabel("Answers")
         self.answerList = QTreeWidget()
-        self.answerList.setHeaderLabels(['Answer', "Neutral", "Happy", "Sad", "Angry"])
+        header = ['Answer']
+        header.extend(["Neutral", "Happy", "Sad", "Angry"])
+        header.extend(AnswerTypes.getTypes())
+        self.answerList.setHeaderLabels(header)
 
         answerHeaderWidget = QWidget()
         answerHeaderLayout = QHBoxLayout()
         answerHeaderLayout.addWidget(answerLabel)
         answerHeaderLayout.addStretch(1)
 
-        self.addKeywordButton = QPushButton("+")
-        self.removeKeywordButton = QPushButton("-")
+        self.addAnswerButton = QPushButton("+")
+        self.removeAnswerButton = QPushButton("-")
 
-        answerHeaderLayout.addWidget(self.addKeywordButton)
-        answerHeaderLayout.addWidget(self.removeKeywordButton)
-
+        answerHeaderLayout.addWidget(self.addAnswerButton)
+        answerHeaderLayout.addWidget(self.removeAnswerButton)
         answerHeaderWidget.setLayout(answerHeaderLayout)
 
         answerLayout.addWidget(answerHeaderWidget)
@@ -105,7 +108,7 @@ class EditEntryWidget(QWidget):
         buttonLayout.addWidget(self.cancelButton)
         buttonBar.setLayout(buttonLayout)
         layout.addWidget(buttonBar)
-
+        self.updateDomainSelection()
         self.setLayout(layout)
     
     def show(self, entry):
@@ -118,7 +121,10 @@ class EditEntryWidget(QWidget):
         self.keywordList.clear()
         for pattern in entry.patterns:
             self.addPattern(pattern)
-
+            
+        self.answerList.clear()
+        for sentence in entry.sentences:
+            self.addAnswer(sentence)
 
     def setStatusSaved(self, status):
         if(status == True):
@@ -166,6 +172,14 @@ class EditEntryWidget(QWidget):
     def pattern_selected(self, item):
         self.currentPattern = item
 
-    def addAnswer(self):
-        a = SentenceWidget()
+    def addAnswer(self, answer):
+        a = SentenceWidget(answer)
         a.addTo(self.answerList)
+        return a
+
+    def removeCurrentAnswer(self):
+        item = self.answerList.currentItem()
+        idx = self.answerList.indexOfTopLevelItem(item)
+        self.answerList.takeTopLevelItem(idx)
+        answer = item.sentence
+        return answer

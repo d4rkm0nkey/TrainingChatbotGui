@@ -52,3 +52,6 @@ class MainController():
 
     def removeDomain(self, name):
         Domains.removeDomain(name)
+
+    def removeAnswer(self, answer):
+        pass

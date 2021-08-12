@@ -1,3 +1,4 @@
+from data.sentence import Sentence
 from data import Entries, Bots, Domains
 from PyQt5.QtWidgets import QErrorMessage, QInputDialog, QMessageBox
 class Adapter():
@@ -24,6 +25,10 @@ class Adapter():
         view.editWidget.domains.clicked.connect(view.editWidget.openDomainEdit)
         view.editWidget.domainDialog.addButton.clicked.connect(self.addDomain)
         view.editWidget.domainDialog.removeButton.clicked.connect(self.removeDomain)
+        view.editWidget.addAnswerButton.clicked.connect(self.addAnswer)
+        view.editWidget.removeAnswerButton.clicked.connect(self.removeAnswer)
+        view.editWidget.domainSelector.currentIndexChanged.connect(self.domainChanged)
+
 
     def addDomain(self):
         domain = self.view.editWidget.domainDialog.getName()
@@ -59,3 +64,13 @@ class Adapter():
             error_dialog = QErrorMessage()
             error_dialog.showMessage('Invalid name.')
 
+    def addAnswer(self):
+        self.view.editWidget.addAnswer(Sentence(""))
+        Entries.setCurrentUnsaved()
+
+    def removeAnswer(self):
+        self.view.editWidget.removeCurrentAnswer()
+        Entries.setCurrentUnsaved()
+
+    def domainChanged(self):
+        Entries.setCurrentUnsaved()

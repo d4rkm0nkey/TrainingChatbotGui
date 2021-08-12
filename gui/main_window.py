@@ -71,6 +71,9 @@ class MainWindow(QMainWindow, Observer, metaclass=MetaMainWindow):
             item = self.editWidget.keywordList.item(i)
             w = self.editWidget.keywordList.itemWidget(item)
             data.patterns.append(w.layout().itemAt(1).widget().text())
+        data.sentences = []
+        for i in range(self.editWidget.answerList.topLevelItemCount()):
+            data.sentences.append(self.editWidget.answerList.topLevelItem(i).sentence)
         return data
 
     def updateDomains(self):

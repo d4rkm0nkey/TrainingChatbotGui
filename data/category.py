@@ -1,4 +1,4 @@
-from data import Database
+from data import Database, sentence
 from data import Sentence
 from data import Bots
 
@@ -7,6 +7,7 @@ class Category():
         if bot is not None:
             self.bot = bot._id
         self.sentences = []
+        self.sentence_ids = []
         self.patterns = []
         self.data = data
         self.isSaved = False
@@ -24,6 +25,8 @@ class Category():
             if hasattr(data, "domain"):
                 self.domain = data.domain
             self.patterns = data.patterns
+            self.sentences = data.sentences
+            self.sentence_ids = data.sentence_ids
         else:
             self._id = data["_id"]
             self.name = data["name"]
@@ -34,6 +37,15 @@ class Category():
             if patterns is None: patterns = []
             for pat in patterns:
                 self.patterns.append(pat)
+            self.sentence_ids = data.get("sentences")
+            self.sentences = []
+            if self.sentence_ids is None:
+                self.sentence_ids = []
+            for id in self.sentence_ids:
+                data = Database.find_one(Database.COLLECTIONS.SENTENCE, {"_id": id})
+                s = Sentence()
+                s.load_from_dict(data)
+                self.sentences.append(s)
              
     def addPattern(self, pattern):
         if len(pattern) > 0:
@@ -65,6 +77,10 @@ class Category():
 
     def save(self):
         if(self.name is not None):
+            self.sentence_ids = []
+            for s in self.sentences:
+                s.save()
+                self.sentence_ids.append(s._id)
             if hasattr(self, "_id"):
                 Database.replace(Database.COLLECTIONS.CATEGORY, self.toDict())
             else:
@@ -83,7 +99,8 @@ class Category():
             "name": self.name,
             "bot": self.bot,
             "domain": self.domain,
-            "patterns": self.patterns
+            "patterns": self.patterns,
+            "sentences": self.sentence_ids
         }
         if hasattr(self, "_id"):
             dict["_id"] = self._id

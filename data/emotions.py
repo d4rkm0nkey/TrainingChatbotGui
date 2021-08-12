@@ -12,4 +12,5 @@ class Emotions():
 
     @staticmethod
     def getLength():
-        return len(__emotions__)
+        return 4
+        #return len(Emotions.__emotions__)

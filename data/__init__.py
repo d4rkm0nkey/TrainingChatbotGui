@@ -1,3 +1,4 @@
+from .answer_types import AnswerTypes
 from .database import Database
 from .emotions import Emotions
 from .bot import Bot, Bots
